@@ -1,5 +1,6 @@
 const Users = require("../models/users.models");
 const uuid = require('uuid');
+const { hashPassword } = require("../utils/crypto");
 
 const findAllUsers = async() => {
   const data = await Users.findAll();
@@ -22,7 +23,7 @@ const createNewUser = async ( userInformation ) => {
     firstName: userInformation.firstName,
     lastName: userInformation.lastName,
     email: userInformation.email,
-    password: userInformation.password,
+    password: hashPassword(userInformation.password),
     profileImage: userInformation.profileImage,
     phone: userInformation.phone
   }
