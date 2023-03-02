@@ -1,5 +1,6 @@
 const usersControllers = require('./users.controllers');
 const responsesHandler = require('../utils/handleResponses');
+const { hashPassword } = require('../utils/crypto');
 
 const getAllUsers = (_req, res) => {
 
@@ -173,10 +174,94 @@ const patchUser = (req, res) => {
 
 }
 
+// Servicios para acciones sobre el propio usuario
+
+const getMyUser = ( req, res ) => {
+
+  const id = req.user.id;
+
+  usersControllers.findUserById( id )
+    .then( data => {
+      responsesHandler.success({
+        res,
+        status: 200,
+        message: 'This is your current user',
+        data
+      })
+    })
+    .catch( error => {
+      responsesHandler.error({
+        res,
+        status: 400,
+        message: 'Something bad happend with this current user',
+        data: err
+      })
+    })
+
+}
+
+const deleteMyUser = ( req, res ) => {
+
+  const id = req.user.id;
+
+  usersControllers.deleteUser( id )
+    .then( (_data) => {
+      responsesHandler.success({
+        res,
+        status: 200,
+        message: `User deleted successfully with id ${id}`
+      })
+    })  
+    .catch( err => {
+      responsesHandler.success({
+        res,
+        status: 400,
+        message: `It was not possible to delete user with id ${id}`,
+        data: err
+      })
+    })
+}
+
+const patchMyUser = ( req, res ) => {
+
+  const id = req.user.id;
+  const { password, firstName, lastName, profileImage, email, phone } = req.body;
+
+  const userObj = {
+    firstName,
+    lastName,
+    email,
+    password: hashPassword( password ),
+    profileImage,
+    phone
+  }
+
+  usersControllers.updateUser( id, userObj )
+    .then( (_data) => {
+      responsesHandler.success({
+        res,
+        status: 200,
+        message: 'Your was updated successfully',
+      })
+    })
+    .catch( error => {
+      responsesHandler.error({
+        res,
+        status: 400,
+        message: 'Somethind bad happend',
+        data: error
+      })
+    })
+
+}
+
 module.exports = {
   getAllUsers,
   getUserById,
   postNewUser,
   deleteUser,
-  patchUser
+  patchUser,
+  getMyUser,
+  deleteMyUser,
+  patchMyUser
 }

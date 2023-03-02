@@ -2,7 +2,9 @@ const express = require('express');
 const responseHandlers = require('./utils/handleResponses');
 const db = require('./utils/database');
 const initModels = require('./models/initModels');
+const passportJWT = require('./middlewares/auth.middleware');
 const usersRouter = require('./users/users.router');
+const authRouter = require('./auth/auth.router');
 
 const app = express();
 app.use( express.json() );
@@ -33,7 +35,15 @@ app.get('/', ( _req, res ) => {
 
 });
 
+app.get('/protected', passportJWT, (req, res) => {
+  res.status(200).json({ 
+    message: 'This message is protected',
+    tokenDecoded: req.user
+  })
+})
+
 app.use('/api/users', usersRouter );
+app.use('/api/auth', authRouter );
 
 app.use('*', (_req, res) => {
 
